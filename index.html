@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Acesso exclusivo">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Acesso Exclusivo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #8b5cf6; --primary-dark: #5b21b6; --bg-dark: #0a0a0f;
+            --text: #ffffff; --text-muted: #a0a0b0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark); min-height: 100vh;
+            display: flex; align-items: flex-start; justify-content: center; padding-top: 30px;
+            position: relative; overflow-y: auto;
+        }
+        body::before {
+            content: ''; position: fixed; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(139,92,246,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(91,33,182,0.12) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite; pointer-events: none; z-index: 0;
+        }
+        @keyframes float {
+            0%,100%{transform:translate(0,0) rotate(0deg)}
+            33%{transform:translate(30px,-30px) rotate(1deg)}
+            66%{transform:translate(-20px,20px) rotate(-1deg)}
+        }
+        .particles{position:fixed;width:100%;height:100%;overflow:hidden;pointer-events:none;z-index:1}
+        .particle{position:absolute;width:3px;height:3px;background:var(--primary);border-radius:50%;opacity:0;animation:rise 6s infinite}
+        @keyframes rise{
+            0%{opacity:0;transform:translateY(100vh) scale(0)}
+            10%{opacity:0.8}90%{opacity:0.3}
+            100%{opacity:0;transform:translateY(-100vh) scale(1)}
+        }
+        .container{position:relative;z-index:10;text-align:center;padding:0.5rem 2rem 4rem;animation:fadeInUp 1s ease-out}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+        .badge{display:inline-block;padding:0.6rem 1.2rem;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);
+            border-radius:50px;color:var(--primary);font-size:0.85rem;font-weight:600;margin-bottom:2rem;backdrop-filter:blur(10px);animation:pulse 2s ease-in-out infinite}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.4)}50%{box-shadow:0 0 0 12px rgba(139,92,246,0)}}
+        h1{color:var(--text);font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:0.5rem;
+            letter-spacing:-1.5px;background:linear-gradient(135deg,#fff,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .subtitle{color:var(--text-muted);font-size:clamp(1rem,2.5vw,1.25rem);font-weight:400;max-width:600px;margin:0 auto 1rem;line-height:1.6}
+        .btn-wrapper{position:relative;display:inline-block}
+        .btn-wrapper::before{content:'';position:absolute;inset:-3px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+            border-radius:50px;filter:blur(15px);opacity:0.6;z-index:-1;animation:glow 3s ease-in-out infinite}
+        @keyframes glow{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:0.7;transform:scale(1.05)}}
+        .btn{position:relative;display:inline-flex;align-items:center;gap:12px;padding:1.2rem 3rem;background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+            color:var(--text);text-decoration:none;border:none;border-radius:50px;font-size:1.1rem;font-weight:600;cursor:pointer;
+            transition:all 0.3s cubic-bezier(0.4,0,0.2,1);box-shadow:0 10px 40px rgba(139,92,246,0.3);letter-spacing:0.3px}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 15px 50px rgba(139,92,246,0.5)}
+        .btn:active{transform:translateY(-1px)}
+        .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+        .btn svg{width:22px;height:22px;flex-shrink:0}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem;margin-top:6rem;max-width:900px;margin:auto}
+        .feature{padding:1.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;
+            backdrop-filter:blur(10px);transition:all 0.3s ease}
+        .feature:hover{background:rgba(255,255,255,0.12);border-color:rgba(139,92,246,0.4);transform:translateY(-4px)}
+        .feature-icon{display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem}
+        .feature-icon img{width:48px;height:48px;object-fit:contain}
+        .feature h3{color:var(--text);font-size:0.95rem;font-weight:600;margin-bottom:0.3rem}
+        .feature p{color:var(--text-muted);font-size:0.85rem}
+        .footer-text{margin-top:3rem;color:var(--text-muted);font-size:0.85rem;opacity:0.6}
+        @media(max-width:640px){.features{grid-template-columns:1fr}.btn{padding:1rem 2rem;font-size:1rem}}
+        .overlay{position:fixed;inset:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);
+            display:none;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity 0.3s ease}
+        .overlay.active{display:flex;opacity:1}
+        .redirect-content{text-align:center;padding:2rem}
+        .spinner{width:60px;height:60px;margin:0 auto 1.5rem;border:3px solid rgba(139,92,246,0.2);border-top-color:var(--primary);
+            border-radius:50%;animation:spin 0.8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .redirect-title{color:var(--text);font-size:1.5rem;font-weight:600;margin-bottom:0.5rem}
+        .redirect-subtitle{color:var(--text-muted);font-size:0.95rem}
+        .progress-bar{width:200px;height:4px;background:rgba(139,92,246,0.1);border-radius:2px;margin:1.5rem auto 0;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-dark));
+            border-radius:2px;animation:progress 1.5s ease-in-out forwards}
+        @keyframes progress{0%{width:0%}100%{width:100%}}
+        .hidden-iframe{position:absolute;width:0;height:0;border:0;opacity:0}
+    </style>
+
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1816742406178203');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1816742406178203&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+</head>
+    <body>
+        <div class="particles" id="particles"></div>
+    <div class="container">
+        <div class="badge">EXCLUSIVO</div>
+        <h1>Acesso Prioritário</h1>
+        <p class="subtitle">Conecte-se agora e tenha acesso ao conteúdo mais exclusivos.</p>
+        <div class="btn-wrapper">
+            <button class="btn" id="mainBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 2L11 13"></path>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                </svg>
+                Entrar Agora
+            </button>
+        </div>
+        <div class="features">
+            <div class="feature"><div class="feature-icon"><img src="cadeado.png" alt="Cadeado"></div><h3>100% Seguro</h3><p>Acesso direto e protegido</p></div>
+            <div class="feature"><div class="feature-icon"><img src="raio.png" alt="Raio"></div><h3>Rápido</h3><p>Conexão instantânea</p></div>
+            <div class="feature"><div class="feature-icon"><img src="exclusivo.png" alt="Exclusivo"></div><h3>Exclusivo</h3><p>Conteúdo selecionado</p></div>
+            <div class="feature"><div class="feature-icon"><img src="direto.png" alt="Direto"></div><h3>Direto</h3><p>Sem intermediários</p></div>
+        </div>
+        <p class="footer-text">Acesso garantido</p>
+    </div>
+    <div class="overlay" id="overlay">
+        <div class="redirect-content">
+            <div class="spinner"></div>
+            <div class="redirect-title">Verificando segurança...</div>
+            <div class="redirect-subtitle">Preparação de conexão</div>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+    </div>
+    <iframe class="hidden-iframe" id="hiddenIframe"></iframe>
+
+    <script>
+        const TRACK_URL = '/api/track';
+        const SESSION_KEY = 'tracking_session';
+
+        function getSessionId() {
+            let session = sessionStorage.getItem(SESSION_KEY);
+            if (!session) {
+                session = crypto.randomUUID();
+                sessionStorage.setItem(SESSION_KEY, session);
+            }
+            return session;
+        }
+
+        function track(evento) {
+            fetch(TRACK_URL, {
+                method: 'POST',
+                keepalive: true,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    evento: evento,
+                    sessionId: getSessionId(),
+                    userAgent: navigator.userAgent,
+                    referrer: document.referrer,
+                    pagina: window.location.href
+                })
+            }).catch(() => {});
+        }
+
+        track('pageview');
+
+        const pieces = ['https://t.m', 'e/', 'famosas360br', '_', 'bot'];
+        function buildUrl() { return pieces.join(''); }
+        
+        function simulateScan(duration, callback) {
+            const steps = ['Validando ambiente...', 'Escaneando redes...', 'Verificando integridade...', 'Preparando conexão...'];
+            let step = 0;
+            const interval = 150 + Math.random() * 100;
+            const titleEl = document.querySelector('.redirect-title');
+            const subtitleEl = document.querySelector('.redirect-subtitle');
+            
+            const timer = setInterval(() => {
+                if (step < steps.length) {
+                    titleEl.textContent = steps[step];
+                    subtitleEl.textContent = 'Processando...';
+                    step++;
+                }
+            }, interval);
+            
+            setTimeout(() => {
+                clearInterval(timer);
+                titleEl.textContent = 'Redirecionando...';
+                subtitleEl.textContent = 'Finalizando conexão';
+                callback();
+            }, duration);
+        }
+
+        document.getElementById('mainBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            track('click_botao');
+            
+            const overlay = document.getElementById('overlay');
+            const iframe = document.getElementById('hiddenIframe');
+            
+            overlay.classList.add('active');
+            this.disabled = true;
+            this.style.opacity = '0.6';
+            
+            const url = buildUrl();
+            iframe.src = 'about:blank';
+            
+            simulateScan(1200 + Math.random() * 800, () => {
+                setTimeout(() => {
+                    iframe.src = url + '?t=' + Date.now() + '&_=' + Math.random().toString(36).substr(2, 9);
+                    setTimeout(() => {
+                        window.location.href = url;
+                    }, 100);
+                }, 300);
+            });
+        });
+
+        const particlesContainer = document.getElementById('particles');
+        const colors = ['#8b5cf6', '#5b21b6', '#a855f7', '#fff'];
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 3 + 2;
+            const left = Math.random() * 100;
+            const delay = Math.random() * 6;
+            const duration = Math.random() * 4 + 6;
+            particle.style.cssText = `left:${left}%;width:${size}px;height:${size}px;background:${color};animation-delay:${delay}s;animation-duration:${duration}s`;
+            particlesContainer.appendChild(particle);
+            setTimeout(() => particle.remove(), (duration + delay) * 1000);
+        }
+
+        setInterval(createParticle, 300);
+
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            document.body.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(139,92,246,0.08) 0%, transparent 50%),var(--bg-dark)`;
+        });
+
+        (function obfuscateConsole() {
+            const orig = console.log;
+            console.log = function() {
+                if (arguments.length > 0 && typeof arguments[0] === 'string') {
+                    if (arguments[0].match(/https?:\/\//i) || arguments[0].match(/telegram\.me/i) || arguments[0].includes('famosas360br')) return;
+                }
+                orig.apply(console, arguments);
+            };
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin • Dashboard</title>
+  <meta name="robots" content="noindex">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-hover: #1a1a24;
+      --border: #2a2a3a;
+      --border-light: #3a3a4a;
+      --text: #ffffff;
+      --text-muted: #888899;
+      --text-secondary: #a0a0b0;
+      --primary: #8b5cf6;
+      --primary-dark: #5b21b6;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.15);
+      --warning: #f59e0b;
+      --pageview-color: #3b82f6;
+      --click-color: #22c55e;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-y: auto; }
+    body::-webkit-scrollbar { width: 6px; }
+    body::-webkit-scrollbar-track { background: var(--bg); }
+    body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    body::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+    /* LOADING */
+    .loading { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .loading-spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* CHAT IA */
+    .chat-toggle{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 8px 30px rgba(139,92,246,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease}
+    .chat-toggle:hover{transform:scale(1.1);box-shadow:0 12px 40px rgba(139,92,246,0.6)}
+    .chat-toggle.hide{bottom:-100px;opacity:0;pointer-events:none}
+    .chat-window{position:fixed;bottom:100px;right:24px;width:400px;max-height:60vh;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,0.5);z-index:1000;display:flex;flex-direction:column;overflow:hidden}
+    .chat-header{padding:1rem;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;font-weight:600;display:flex;align-items:center;gap:8px}
+    .chat-header .ia-dot{width:10px;height:10px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success)}
+    .chat-body{flex:1;padding:1rem;overflow-y:auto;font-size:0.9rem;line-height:1.5;min-height:200px}
+    .chat-message{padding:0.6rem 0.8rem;margin-bottom:0.5rem;border-radius:10px;max-width:85%}
+    .chat-message.user{background:rgba(139,92,246,0.2);margin-left:auto;border-radius:16px}
+    .chat-message.ia{background:rgba(255,255,255,0.05);margin-right:auto;border:1px solid var(--border);border-radius:16px}
+    .chat-message.ia pre{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:0.85rem}
+    .chat-input{display:flex;padding:0.8rem;background:var(--bg);border-top:1px solid var(--border)}
+    .chat-input input{flex:1;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:0.9rem;outline:none}
+    .chat-input input:focus{border-color:var(--primary)}
+    .chat-input button{padding:0.7rem 1.2rem;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border:none;border-radius:10px;color:#fff;font-weight:600;cursor:pointer;margin-left:0.5rem;transition:opacity 0.2s}
+    .chat-input button:hover{opacity:0.9}
+    .chat-input button:disabled{opacity:0.5;cursor:not-allowed}
+
+    /* LOGIN */
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 3rem; width: 100%; max-width: 420px; box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
+    .login-card h1 { font-size: 1.4rem; margin-bottom: 0.75rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+    .login-card p { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem; }
+    .login-card input { width: 100%; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 1rem; transition: border-color 0.2s; }
+    .login-card input:focus { outline: none; border-color: var(--primary); }
+    .login-card button { width: 100%; padding: 0.9rem 1.1rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 10px; color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 1rem; transition: opacity 0.2s; }
+    .login-card button:hover { opacity: 0.95; }
+    .login-card .error { color: var(--danger); margin-top: 1rem; display: none; font-size: 0.87rem; }
+
+    /* PANEL HEADER */
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .panel-header h1 { font-size: 1.8rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .panel-header h1 .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--success); box-shadow: 0 0 12px var(--success); }
+    .panel-header .header-actions { display: flex; align-items: center; gap: 1rem; }
+
+    /* STATS GRID */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; transition: border-color 0.2s; }
+    .stat-card:hover { border-color: var(--border-light); }
+    .stat-card .label { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.6rem; }
+    .stat-card .value { font-size: 2rem; font-weight: 700; color: var(--text); }
+    .stat-card .subtext { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.2rem; }
+    .stat-card .value.blue { color: var(--pageview-color); }
+    .stat-card .value.green { color: var(--success); }
+    .stat-card .value.purple { color: var(--primary); }
+    .stat-card .value.red { color: var(--danger); }
+
+    /* FILTERS */
+    .filters-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-group label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-group input, .filter-group select { padding: 0.55rem 0.9rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.87rem; min-width: 120px; transition: border-color 0.2s; }
+    .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--primary); }
+    .filter-group input[type="date"] { padding: 0.55rem 0.9rem; }
+
+    /* TABLE */
+    .table-container { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: var(--surface-hover); padding: 0.8rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface-hover); }
+
+    /* BADGES */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+    .badge.pageview { background: rgba(59, 130, 246, 0.15); color: var(--pageview-color); }
+    .badge.click_botao { background: var(--success-bg); color: var(--success); }
+
+    /* IP CELL */
+    .ip-cell {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.6rem;
+      background: rgba(139, 92, 246, 0.1);
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* TIMESTAMP */
+    .time-cell { color: var(--text-muted); font-family: 'Courier New', monospace; font-size: 0.82rem; }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+    /* UTILITY */
+    .btn { padding: 0.6rem 1.3rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: opacity 0.2s; white-space: nowrap; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
+    .btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn:hover { opacity: 0.9; }
+    .text-green { color: var(--success); }
+    .text-red { color: var(--danger); }
+
+    @media (max-width: 768px) {
+      thead th:nth-child(3), tbody td:nth-child(3),
+      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+      .filters-bar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading"><div class="loading-spinner"></div></div>
+
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>Dashboard de Tracking</h1>
+      <p>Login com senha para acessar os dados em tempo real</p>
+      <input type="password" id="passwordInput" placeholder="Digite a senha" autocomplete="current-password">
+      <button id="loginBtn">Acessar</button>
+      <div class="error" id="errorMsg">Senha incorreta. Tente novamente.</div>
+    </div>
+  </div>
+
+  <div class="admin-panel" id="adminPanel" style="display:none">
+    <div class="panel-header">
+      <h1><span class="dot"></span>Dashboard de Tracking</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="refreshBtn">Atualizar</button>
+        <button class="btn btn-primary" id="exportBtn">Exportar CSV</button>
+        <button class="btn btn-danger" id="clearBtn">Limpar Tudo</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Total de Eventos</div>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Visitas Únicas (Sessions)</div>
+        <div class="value primary" id="statUnique">0</div>
+        <div class="subtext" id="statUniqueChange">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Pageviews</div>
+        <div class="value blue" id="statViews">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Cliques no Botão</div>
+        <div class="value green" id="statClicks">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Taxa de Conversão</div>
+        <div class="value" id="statConv">0%<span id="statArrow" class="text-green" style="font-size:1rem;margin-left:6px">▲</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Última Atividade</div>
+        <div class="value" style="font-size:1.1rem" id="statLast">—</div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label for="periodFilter">Período</label>
+        <select id="periodFilter">
+          <option value="hoje">Hoje</option>
+          <option value="ontem">Ontem</option>
+          <option value="semana">Últimos 7 dias</option>
+          <option value="mes">Últimos 30 dias</option>
+          <option value="total" selected>Total</option>
+          <option value="custom">Personalizado</option>
+        </select>
+      </div>
+      <div class="filter-group" id="customDateGroup" style="display:none">
+        <label for="dateFrom">Data inicial</label>
+        <input type="date" id="dateFrom">
+        <label for="dateTo">Data final</label>
+        <input type="date" id="dateTo">
+      </div>
+      <div class="filter-group">
+        <label for="eventFilter">Tipo de evento</label>
+        <select id="eventFilter"><option value="">Todos</option><option value="pageview">Pageview</option><option value="click_botao">Clique</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="searchInput">Buscar</label>
+        <input type="text" id="searchInput" placeholder="IP, User-Agent...">
+      </div>
+      <div class="filter-group">
+        <label for="limitSelect">Limite</label>
+        <select id="limitSelect"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option><option value="500">500</option><option value="1000">1000</option></select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Evento</th>
+            <th>IP</th>
+            <th>Session ID</th>
+            <th>Página</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+       <div class="empty-state" id="emptyState" style="display:none">Nenhum dado nesse período</div>
+     </div>
+   </div>
+
+   <div class="chat-toggle" id="chatToggle">💬</div>
+   <div class="chat-window" id="chatWindow">
+     <div class="chat-header">
+       <span class="ia-dot"></span>
+       Assistente IA (Tempo Real)
+     </div>
+     <div class="chat-body" id="chatBody">
+       <div class="chat-message ia">
+         <div>👋 Olá! Sou seu assistente de IA.</div>
+         <div>Pergunte sobre os dados de hoje, visitas, cliques, etc.</div>
+         <div>Ex: "Relatório de hoje" ou "Quantas visitas tivemos hoje?"</div>
+       </div>
+     </div>
+     <div class="chat-input">
+       <input type="text" id="chatInput" placeholder="Pergunte algo..." autocomplete="off">
+       <button id="chatSend">Enviar</button>
+     </div>
+   </div>
+
+   <script>
+    const API = '/api/admin/stats';
+    let allEvents = [];
+    let filtered = [];
+    let pollInterval = null;
+
+    document.getElementById('loginBtn').onclick = login;
+    document.getElementById('passwordInput').addEventListener('keypress', e => e.key === 'Enter' && login());
+    document.getElementById('refreshBtn').onclick = loadData;
+    document.getElementById('exportBtn').onclick = exportCSV;
+    document.getElementById('clearBtn').onclick = clearAll;
+    document.getElementById('searchInput').oninput = () => { updateStats(getFilteredEvents()); renderTable(); };
+    document.getElementById('eventFilter').onchange = () => { updateStats(getFilteredEvents()); renderTable(); };
+    document.getElementById('limitSelect').onchange = () => renderTable();
+    document.getElementById('periodFilter').onchange = filterByPeriod;
+    document.getElementById('dateFrom').onchange = filterByPeriod;
+    document.getElementById('dateTo').onchange = filterByPeriod;
+
+    let authHeader = null;
+
+    async function login() {
+      const pass = document.getElementById('passwordInput').value;
+      try {
+        const res = await fetch(API, { headers: { Authorization: 'Basic ' + btoa('admin:' + pass) } });
+        if (res.ok) {
+          authHeader = { Authorization: 'Basic ' + btoa('admin:' + pass) };
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('adminPanel').style.display = 'block';
+          document.getElementById('loading').style.display = 'none';
+          loadData();
+          pollInterval = setInterval(loadData, 3000);
+        } else {
+          document.getElementById('errorMsg').style.display = 'block';
+        }
+      } catch(e) {
+        document.getElementById('errorMsg').textContent = 'Erro ao conectar. Verifique sua conexão.';
+        document.getElementById('errorMsg').style.display = 'block';
+      }
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(API, { headers: authHeader || { Authorization: 'Basic ' + btoa('admin:admin123') } });
+        if (!res.ok) return;
+        const data = await res.json();
+        allEvents = data.eventos || [];
+        filterByPeriod();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function filterByPeriod() {
+      const period = document.getElementById('periodFilter').value;
+      const now = new Date();
+      let from = null, to = null;
+
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
+      if (period === 'hoje') {
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        to = now;
+      } else if (period === 'ontem') {
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        to = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (period === 'semana') {
+        from = new Date(now.getTime() - 7 * 86400000);
+        to = now;
+      } else if (period === 'mes') {
+        from = new Date(now.getTime() - 30 * 86400000);
+        to = now;
+      } else if (period === 'total') {
+        // no filter
+      } else if (period === 'custom') {
+        const df = document.getElementById('dateFrom').value;
+        const dt = document.getElementById('dateTo').value;
+        if (df) from = new Date(df + 'T00:00:00');
+        if (dt) to = new Date(dt + 'T23:59:59');
+      }
+
+      const customGroup = document.getElementById('customDateGroup');
+      customGroup.style.display = period === 'custom' ? 'flex' : 'none';
+
+      filtered = allEvents.filter(e => {
+        const d = new Date(e.timestamp);
+        if (from && d < from) return false;
+        if (to && d > to) return false;
+        return true;
+       });
+
+      updateStats(getFilteredEvents());
+      renderTable();
+    }
+
+    function getFilteredEvents() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const eventFilter = document.getElementById('eventFilter').value;
+      return filtered.filter(e => {
+        if (eventFilter && e.evento !== eventFilter) return false;
+        const hay = (e.ip + ' ' + e.userAgent + ' ' + e.pagina + ' ' + e.referrer + ' ' + (e.sessionId||'')).toLowerCase();
+        return hay.includes(search);
+      });
+    }
+
+    function updateStats(events = filtered) {
+      const unique = new Set(events.map(e => e.sessionId).filter(Boolean));
+      const views = events.filter(e => e.evento === 'pageview').length;
+      const clicks = events.filter(e => e.evento === 'click_botao').length;
+      const conv = views ? ((clicks / views) * 100).toFixed(1) : '0.0';
+      const last = events.length > 0 ? events[0].timestamp : null;
+
+      document.getElementById('statTotal').textContent = events.length;
+      document.getElementById('statUnique').textContent = unique.size;
+      document.getElementById('statViews').textContent = views;
+      document.getElementById('statClicks').textContent = clicks;
+      document.getElementById('statConv').textContent = conv + '%';
+      document.getElementById('statLast').textContent = last ? formatTime(last) : '—';
+    }
+
+    function renderTable() {
+      const limit = parseInt(document.getElementById('limitSelect').value);
+      let events = getFilteredEvents();
+      events = events.slice(0, limit);
+
+      const tbody = document.getElementById('tableBody');
+      const empty = document.getElementById('emptyState');
+
+      if (!events.length) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      tbody.innerHTML = events.map(e => `
+        <tr>
+          <td><span class="time-cell">${formatTime(e.timestamp)}</span></td>
+          <td><span class="badge ${e.evento}">${e.evento === 'click_botao' ? 'Clique' : 'View'}</span></td>
+          <td><span class="ip-cell">${e.ip || '—'}</span></td>
+          <td><span class="time-cell">${truncate(e.sessionId || '—', 12)}</span></td>
+          <td class="time-cell">${truncate(e.pagina || '', 50)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    function truncate(str, n) {
+      if (!str) return '—';
+      return str.length > n ? str.slice(0, n) + '…' : str;
+    }
+
+    function exportCSV() {
+      const rows = [['Hora', 'Evento', 'IP', 'Session ID', 'User-Agent', 'Referrer', 'Página']];
+      filtered.forEach(e => {
+        rows.push([
+          e.timestamp || '',
+          e.evento || '',
+          e.ip || '',
+          e.sessionId || '',
+          e.userAgent || '',
+          e.referrer || '',
+          e.pagina || ''
+        ]);
+      });
+      const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `tracking-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    async function clearAll() {
+      if (!confirm('Tem certeza? Todos os dados serão apagados permanentemente.')) return;
+      await fetch('/api/admin/clear', {
+        method: 'POST',
+        headers: { Authorization: 'Basic ' + btoa('admin:admin123') }
+      });
+       allEvents = [];
+      filtered = [];
+      updateStats(getFilteredEvents());
+      renderTable();
+    }
+
+    document.getElementById('loading').style.display = 'none';
+
+    /* CHAT IA */
+    const chatToggle = document.getElementById('chatToggle');
+    const chatWindow = document.getElementById('chatWindow');
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+
+    chatToggle.onclick = () => {
+      chatWindow.style.display = chatWindow.style.display === 'block' ? 'none' : 'block';
+      chatToggle.classList.toggle('hide');
+      if (chatWindow.style.display === 'block') {
+        chatInput.focus();
+      }
+    };
+
+    function addMessage(sender, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-message ' + sender;
+      const pre = document.createElement('pre');
+      pre.textContent = text;
+      msgDiv.appendChild(pre);
+      chatBody.appendChild(msgDiv);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    async function sendChatQuery() {
+      const query = chatInput.value.trim();
+      if (!query) return;
+      addMessage('user', query);
+      chatInput.value = '';
+      chatInput.disabled = true;
+      chatSend.disabled = true;
+      addMessage('ia', '🤔 Analisando os dados...');
+
+      try {
+        const res = await fetch('/api/admin/chat', {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader ? authHeader.Authorization : 'Basic ' + btoa('admin:admin123'),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: query })
+        });
+        const data = await res.json();
+        const iaMsg = chatBody.querySelector('.chat-message.ia:last-child pre');
+        if (iaMsg) iaMsg.textContent = data.resposta || 'Resposta não disponível';
+      } catch(e) {
+        const iaMsg = chatBody.querySelector('.chat-message.ia:last-child pre');
+        if (iaMsg) iaMsg.textContent = 'Erro ao conectar com a IA. Tente novamente.';
+        console.error(e);
+      }
+
+      chatInput.disabled = false;
+      chatSend.disabled = false;
+      chatInput.focus();
+    }
+
+    chatSend.onclick = sendChatQuery;
+    chatInput.addEventListener('keypress', e => e.key === 'Enter' && sendChatQuery());
+  </script>
+</body>
+</html>
